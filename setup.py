@@ -8,11 +8,11 @@ except ImportError:
 
 setup(
     name='gentletool',
-    version='0.1',
-    maintainer='Michael Lee',
+    version='0.2',
+    maintainer='liyong',
     maintainer_email='liyong19861014@gmail.com',
     url='https://github.com/airhuman/gentletool',
-    description='慢慢删除大文件',
+    description='some gentle tool',
     packages=['gentle'],
     entry_points={
         'console_scripts': [
