@@ -1,0 +1,19 @@
+# 一些工具 #
+
+## 安装 ##
+
+```
+$ pip install -U gentle_rm
+```
+
+## 使用gentle_rm ##
+
+缓慢删除大文件
+
+```
+$ gentle_rm --help
+```
+
+
+
+

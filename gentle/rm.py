@@ -19,6 +19,12 @@ import re
 from collections import namedtuple
 import time
 
+PY_VER = sys.version_info[0]
+if PY_VER == 2:
+    user_input = raw_input
+if PY_VER == 3:
+    user_input = input
+
 Input = namedtuple('Input', ['block_size', 'verbose', 'files'])
 
 logging.basicConfig(
@@ -75,7 +81,7 @@ def parse_input():
 
     try:
         args = parser.parse_args()
-        return Input(block_size=args.block_size, verbose=False, files=args.file)
+        return Input(block_size=args.bs, verbose=False, files=args.file)
     except IOError as e:
         traceback.print_exc()
         sys.exit(1)
@@ -157,9 +163,10 @@ def gentle_delete_file(fname, block_size, verbose=False):
         fd = os.open(fname, os.O_RDWR)
         while st_size > 0:
             st_size -= block_size
-            os.ftruncate(fd, st_size)
+            if st_size >= 0:
+                os.ftruncate(fd, st_size)
             time.sleep(_DEFAULT_SLEEP_INTERVAL)
-            current_size = os.stat(fname).st_size
+            # current_size = os.stat(fname).st_size
             # left_size_pct = float(current_size) / origin_size * 100
     except OSError as e:
         _LOGGER.error('删除文件{0}异常, {1}'.format(fname, str(e)))
@@ -172,6 +179,9 @@ def gentle_delete_file(fname, block_size, verbose=False):
             '已经删除{0}, 耗时 {1} '.format(fname, human_time_cost(time_cost)))
 
 
+def reduce_process_priority():
+    os.nice(20)
+
 def main():
     inputs = parse_input()
     writables, not_writables, not_found, not_files = check_write_permission(
@@ -181,12 +191,15 @@ def main():
         _LOGGER.warning('没有可删除的文件, 拜拜~')
         sys.exit(0)
 
-    confirm = input('------> 确定要删除吗？(Y/N, Yes/No): ').lower()
+    confirm = user_input('------> 确定要删除吗？(Y/N, Yes/No): ')
+    confirm = confirm.lower()
     if confirm == 'y' or confirm == 'yes':
         pass
     else:
         _LOGGER.warning('拜拜~')
         sys.exit(0)
+
+    reduce_process_priority()
 
     # 依次删除文件
     for fname in writables:
