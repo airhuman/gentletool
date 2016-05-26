@@ -3,7 +3,7 @@
 ## 安装 ##
 
 ```
-$ pip install -U gentle_rm
+$ pip install -U gentletool
 ```
 
 ## 使用gentle_rm ##
