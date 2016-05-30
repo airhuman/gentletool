@@ -188,10 +188,11 @@ def reduce_process_priority():
 def main():
     inputs = parse_input()
     filenames = []
+    saved_stdin = sys.stdin
     if not inputs.stdin:
         filenames = inputs.files
     else:
-        for line in sys.stdin:
+        for line in saved_stdin:
             fname = line.replace('\n', '')
             if fname:
                 filenames.append(fname)
@@ -203,6 +204,7 @@ def main():
         _LOGGER.warning('没有可删除的文件, 拜拜~')
         sys.exit(0)
 
+    sys.stdin = open('/dev/tty', 'r')
     confirm = user_input('------> 确定要删除吗？(Y/N, Yes/No): ')
     confirm = confirm.lower()
     if confirm == 'y' or confirm == 'yes':
@@ -210,6 +212,8 @@ def main():
     else:
         _LOGGER.warning('拜拜~')
         sys.exit(0)
+    #恢复stdin
+    sys.stdin = saved_stdin
 
     reduce_process_priority()
 
