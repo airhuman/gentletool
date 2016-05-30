@@ -25,7 +25,7 @@ if PY_VER == 2:
 if PY_VER == 3:
     user_input = input
 
-Input = namedtuple('Input', ['block_size', 'verbose', 'files'])
+Input = namedtuple('Input', ['block_size', 'verbose', 'files', 'stdin'])
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)s \n%(message)s\n', level=logging.INFO)
@@ -56,11 +56,11 @@ def convert_human_bs_input(bs_string):
     nbytes = int(nbytes)
     base = base.lower()
     if base == 'k':
-        nbytes *= 1024
+        nbytes *= KB
     elif base == 'm':
-        nbytes *= 1024 * 1024
+        nbytes *= MB
     elif base == 'g':
-        nbytes *= 1024 * 1024 * 1024
+        nbytes *= GB
     return nbytes
 
 
@@ -76,12 +76,14 @@ def parse_input():
     #                     action='store_true',
     #                     default=False,
     #                     help='verbose output')
-    parser.add_argument('file', nargs='+',
-                        help='要删除的文件或文件列表')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--file', nargs='+', help='要删除的文件或文件列表')
+    group.add_argument(
+        '--stdin', default=False, action='store_true', help='从标准输入读取')
 
     try:
         args = parser.parse_args()
-        return Input(block_size=args.bs, verbose=False, files=args.file)
+        return Input(block_size=args.bs, verbose=False, files=args.file, stdin=args.stdin)
     except IOError as e:
         traceback.print_exc()
         sys.exit(1)
@@ -182,10 +184,20 @@ def gentle_delete_file(fname, block_size, verbose=False):
 def reduce_process_priority():
     os.nice(20)
 
+
 def main():
     inputs = parse_input()
+    filenames = []
+    if not inputs.stdin:
+        filenames = inputs.files
+    else:
+        for line in sys.stdin:
+            fname = line.replace('\n', '')
+            if fname:
+                filenames.append(fname)
+
     writables, not_writables, not_found, not_files = check_write_permission(
-        inputs.files)
+        filenames)
     show_permission_result(writables, not_writables, not_found, not_files)
     if not writables:
         _LOGGER.warning('没有可删除的文件, 拜拜~')

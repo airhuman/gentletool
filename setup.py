@@ -8,7 +8,7 @@ except ImportError:
 
 setup(
     name='gentletool',
-    version='0.2',
+    version='0.3',
     maintainer='liyong',
     maintainer_email='liyong19861014@gmail.com',
     url='https://github.com/airhuman/gentletool',

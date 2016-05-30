@@ -12,6 +12,8 @@ $ pip install -U gentletool
 
 ```
 $ gentle_rm --help
+
+$ find /tmp -type f -size +500M | gentle_rm --stdin
 ```
 
 
